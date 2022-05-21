@@ -14,6 +14,7 @@ import ConfirmPopup from './ConfirmPopup';
 import ProtectedRoute from './ProtectedRoute';
 import Login from './Login';
 import Register from './Register';
+import InfoTooltip from './InfoTooltip';
 
 function App() {
   const [currentUser, setCurrentUser] = React.useState({});
@@ -22,10 +23,11 @@ function App() {
   const [isEditProfilePopupOpen, setEditProfilePopup] = React.useState(false);
   const [isAddPlacePopupOpen, setAddPlacePopupOpen] = React.useState(false);
   const [isConfirmPopupOpen, setConfirmPopupOpen] = React.useState(false);
+  const [isTooltipPopupOpened, setTooltipPopupOpened] = React.useState(true);
   const [selectedCard, setSelectedCard] = React.useState(null);
   const [isSaving, setIsSaving] = React.useState(false);
   const [cardToDelete, setCardToDelete] = React.useState(null);
-  const [loggedIn, setLoggedIn] = React.useState(false);
+  const [loggedIn, setLoggedIn] = React.useState(true);
 
   React.useEffect(() => {
     Promise.all([api.getInitialUser(), api.getInitialCards()])
@@ -57,6 +59,7 @@ function App() {
     setEditProfilePopup(false);
     setAddPlacePopupOpen(false);
     setConfirmPopupOpen(false);
+    setTooltipPopupOpened(false);
     setSelectedCard(null);
   }
 
@@ -157,7 +160,7 @@ function App() {
           <ConfirmPopup isOpen={isConfirmPopupOpen} onClose={closeAllPopups} onAgree={handleConfirmedCardDelete}/>
           <ImagePopup card={selectedCard} onClose={closeAllPopups}/>
         </>}
-
+        <InfoTooltip isOpen={isTooltipPopupOpened} onClose={closeAllPopups} isOk={}/>
       </div>
     </CurrentUserContext.Provider>
   )
