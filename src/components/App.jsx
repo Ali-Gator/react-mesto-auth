@@ -1,6 +1,6 @@
 import '../index.css';
 import React from 'react';
-import {BrowserRouter, Route, Routes} from 'react-router-dom';
+import {Route, Switch} from 'react-router-dom';
 import api from '../utils/api';
 import {CurrentUserContext} from '../contexts/CurrentUserContext';
 import Header from './Header';
@@ -11,6 +11,9 @@ import EditProfilePopup from './EditProfilePopup';
 import EditAvatarPopup from './EditAvatarPopup';
 import AddPlacePopup from './AddPlacePopup';
 import ConfirmPopup from './ConfirmPopup';
+import ProtectedRoute from './ProtectedRoute';
+import Login from './Login';
+import Register from './Register';
 
 function App() {
   const [currentUser, setCurrentUser] = React.useState({});
@@ -22,14 +25,15 @@ function App() {
   const [selectedCard, setSelectedCard] = React.useState(null);
   const [isSaving, setIsSaving] = React.useState(false);
   const [cardToDelete, setCardToDelete] = React.useState(null);
+  const [loggedIn, setLoggedIn] = React.useState(false);
 
   React.useEffect(() => {
     Promise.all([api.getInitialUser(), api.getInitialCards()])
-        .then(([user, cards]) => {
-          setCurrentUser(user);
-          setCards(cards);
-        })
-        .catch(err => console.log(err));
+      .then(([user, cards]) => {
+        setCurrentUser(user);
+        setCards(cards);
+      })
+      .catch(err => console.log(err));
   }, []);
 
   function handleEditAvatarClick() {
@@ -60,10 +64,10 @@ function App() {
     const isLiked = card.likes.some(user => user._id === currentUser._id);
 
     api.changeLikeCardStatus(card._id, !isLiked)
-        .then(newCard => {
-          setCards(state => state.map(c => c._id === card._id ? newCard : c));
-        })
-        .catch(err => console.log(err));
+      .then(newCard => {
+        setCards(state => state.map(c => c._id === card._id ? newCard : c));
+      })
+      .catch(err => console.log(err));
   }
 
   function handleCardDelete(card) {
@@ -73,83 +77,91 @@ function App() {
 
   function handleConfirmedCardDelete() {
     api.deleteCard(cardToDelete._id)
-        .then(() => {
-          setCards(state => state.filter(c => c._id !== cardToDelete._id));
-          closeAllPopups();
-        })
-        .catch(err => alert(`${err}. Попробуйте ещё раз`));
+      .then(() => {
+        setCards(state => state.filter(c => c._id !== cardToDelete._id));
+        closeAllPopups();
+      })
+      .catch(err => alert(`${err}. Попробуйте ещё раз`));
   }
 
   function handleUpdateUser(user) {
     setIsSaving(true);
     api.patchProfile(user)
-        .then((newUser) => {
-          setCurrentUser(newUser);
-          closeAllPopups();
-        })
-        .catch(err => {
-          alert(`${err}. Не удается отправить. Попробуйте ещё раз`);
-        })
-        .finally(() => setIsSaving(false));
+      .then((newUser) => {
+        setCurrentUser(newUser);
+        closeAllPopups();
+      })
+      .catch(err => {
+        alert(`${err}. Не удается отправить. Попробуйте ещё раз`);
+      })
+      .finally(() => setIsSaving(false));
   }
 
   function handleUpdateAvatar(avatar) {
     setIsSaving(true);
     api.patchAvatar(avatar)
-        .then((newUser) => {
-          setCurrentUser(newUser);
-          closeAllPopups();
-        })
-        .catch(err => {
-          alert(`${err}. Не удается отправить. Попробуйте ещё раз`);
-        })
-        .finally(() => setIsSaving(false));
+      .then((newUser) => {
+        setCurrentUser(newUser);
+        closeAllPopups();
+      })
+      .catch(err => {
+        alert(`${err}. Не удается отправить. Попробуйте ещё раз`);
+      })
+      .finally(() => setIsSaving(false));
   }
 
   function handleAddCard(card) {
     setIsSaving(true);
     api.postCard(card)
-        .then(newCard => {
-          setCards(state => [newCard, ...state]);
-          closeAllPopups();
-        })
-        .catch(err => {
-          alert(`${err}. Не удается отправить. Попробуйте ещё раз`);
-        })
-        .finally(() => setIsSaving(false));
+      .then(newCard => {
+        setCards(state => [newCard, ...state]);
+        closeAllPopups();
+      })
+      .catch(err => {
+        alert(`${err}. Не удается отправить. Попробуйте ещё раз`);
+      })
+      .finally(() => setIsSaving(false));
   }
 
   return (
-      <BrowserRouter>
-        <CurrentUserContext.Provider value={currentUser}>
-          <div className="page">
-            <Header/>
-            <Routes>
-              {/*<Route path="/sign-up">*/}
+    <CurrentUserContext.Provider value={currentUser}>
+      <div className="page">
+        <Header/>
+        <Switch>
+          <Route path="/sign-up">
+            <Register/>
+          </Route>
+          <Route path="/sign-in">
+            <Login/>
+          </Route>
+          <ProtectedRoute path="/"
+                          loggedIn={loggedIn}
+                          component={Main}
+                          onEditAvatar={handleEditAvatarClick}
+                          onEditProfile={handleEditProfileClick}
+                          onAddPlace={handleAddPlaceClick}
+                          onImageClick={handleImageClick}
+                          cards={cards}
+                          onCardLike={handleCardLike}
+                          onCardDelete={handleCardDelete}/>
 
-              {/*</Route>*/}
-              {/*<Route path="/sign-in">*/}
+        </Switch>
+        {loggedIn && <>
+          <Footer/>
+          <EditAvatarPopup isOpen={isEditAvatarPopupOpen} onClose={closeAllPopups}
+                           onUpdateAvatar={handleUpdateAvatar} isSaving={isSaving}/>
+          <EditProfilePopup isOpen={isEditProfilePopupOpen} onClose={closeAllPopups}
+                            onUpdateUser={handleUpdateUser} isSaving={isSaving}/>
+          <AddPlacePopup isOpen={isAddPlacePopupOpen} onClose={closeAllPopups} onAddCard={handleAddCard}
+                         isSaving={isSaving}/>
+          <ConfirmPopup isOpen={isConfirmPopupOpen} onClose={closeAllPopups} onAgree={handleConfirmedCardDelete}/>
+          <ImagePopup card={selectedCard} onClose={closeAllPopups}/>
+        </>}
 
-              {/*</Route>*/}
-              <Route path="/"
-                     element={<Main onEditAvatar={handleEditAvatarClick} onEditProfile={handleEditProfileClick}
-                                    onAddPlace={handleAddPlaceClick} onImageClick={handleImageClick} cards={cards}
-                                    onCardLike={handleCardLike} onCardDelete={handleCardDelete}/>}/>
-
-            </Routes>
-            <Footer/>
-            <EditAvatarPopup isOpen={isEditAvatarPopupOpen} onClose={closeAllPopups}
-                             onUpdateAvatar={handleUpdateAvatar} isSaving={isSaving}/>
-            <EditProfilePopup isOpen={isEditProfilePopupOpen} onClose={closeAllPopups}
-                              onUpdateUser={handleUpdateUser} isSaving={isSaving}/>
-            <AddPlacePopup isOpen={isAddPlacePopupOpen} onClose={closeAllPopups} onAddCard={handleAddCard}
-                           isSaving={isSaving}/>
-            <ConfirmPopup isOpen={isConfirmPopupOpen} onClose={closeAllPopups} onAgree={handleConfirmedCardDelete}/>
-            <ImagePopup card={selectedCard} onClose={closeAllPopups}/>
-          </div>
-        </CurrentUserContext.Provider>
-      </BrowserRouter>
-  );
+      </div>
+    </CurrentUserContext.Provider>
+  )
+    ;
 }
 
 export default App;
