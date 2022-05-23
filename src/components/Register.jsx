@@ -16,7 +16,7 @@ const Register = ({onRegister}) => {
     setPassword(e.target.value);
   }
 
-  function onRegister(e) {
+  function handleRegister(e) {
     e.preventDefault();
     register(email, password)
       .then(data => {
@@ -33,7 +33,7 @@ const Register = ({onRegister}) => {
 
   return (
     <main className="auth page__auth auth_type_register">
-      <form onSubmit={onRegister} className="auth__form" method="post">
+      <form onSubmit={handleRegister} className="auth__form" method="post">
         <h2 className="auth__heading">Регистрация</h2>
         <div className="auth__input-wrapper">
           <input onChange={handleEmailChange} className="auth__input" type="email" name="email"

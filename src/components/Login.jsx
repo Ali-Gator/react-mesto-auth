@@ -16,7 +16,7 @@ const Login = ({onLogin}) => {
     setPassword(e.target.value);
   }
 
-  function onLogin(e) {
+  function handleLogin(e) {
     e.preventDefault();
     authorize(email, password)
       .then(data => {
@@ -36,7 +36,7 @@ const Login = ({onLogin}) => {
 
   return (
     <main className="auth page__auth auth_type_register">
-      <form onSubmit={onLogin} className="auth__form" method="post">
+      <form onSubmit={handleLogin} className="auth__form" method="post">
         <h2 className="auth__heading">Вход</h2>
         <div className="auth__input-wrapper">
           <input onChange={handleEmailChange} className="auth__input" type="email" placeholder="Email" required/>
