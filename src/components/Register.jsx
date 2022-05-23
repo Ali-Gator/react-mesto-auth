@@ -20,8 +20,10 @@ const Register = ({onRegister}) => {
     e.preventDefault();
     register(email, password)
       .then(data => {
-        onRegister(true);
-        history.push('/');
+        if (data) {
+          onRegister(true);
+          history.push('/sign-in');
+        }
       })
       .catch((e) => {
         console.log(e);

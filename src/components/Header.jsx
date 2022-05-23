@@ -1,8 +1,14 @@
-import React from 'react';
+import React, {useContext} from 'react';
 import logo from '../images/header-logo-white.svg';
 import {NavLink, Route, Switch} from 'react-router-dom';
+import {CurrentUserContext} from '../contexts/CurrentUserContext';
 
 export default function Header() {
+  const currentUser = useContext(CurrentUserContext);
+
+  function signOut() {
+    localStorage.removeItem('token');
+  }
 
   return (
     <header className="page__header header">
@@ -16,8 +22,8 @@ export default function Header() {
             <NavLink to="/sign-up" className="header__link">Регистрация</NavLink>
           </Route>
           <Route path="/">
-            <p className="header__text">email@mail.com</p>
-            <NavLink to="/sign-in" className="header__link header__link_minor">Выйти</NavLink>
+            <p className="header__text">{currentUser.email}</p>
+            <NavLink onClick={signOut} to="/sign-in" className="header__link header__link_minor">Выйти</NavLink>
           </Route>
         </Switch>
       </div>

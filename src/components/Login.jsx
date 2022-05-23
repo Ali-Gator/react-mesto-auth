@@ -1,16 +1,49 @@
-import React from 'react';
+import React, {useState} from 'react';
+import {useHistory} from 'react-router-dom';
+import {authorize} from '../utils/auth';
 
-const Login = () => {
+const Login = ({onLogin}) => {
+
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  let history = useHistory();
+
+  function handleEmailChange(e) {
+    setEmail(e.target.value);
+  }
+
+  function handlePasswordChange(e) {
+    setPassword(e.target.value);
+  }
+
+  function handleSubmit(e) {
+    e.preventDefault();
+    authorize(email, password)
+      .then(data => {
+        if (data.token) {
+          setEmail('');
+          setPassword('');
+          localStorage.setItem('token', data.token);
+          onLogin(true);
+          history.push('/');
+        }
+      })
+      .catch((e) => {
+        console.log(e);
+        onLogin(false);
+      });
+  }
 
   return (
     <main className="auth page__auth auth_type_register">
-      <form className="auth__form" method="post">
+      <form onSubmit={handleSubmit} className="auth__form" method="post">
         <h2 className="auth__heading">Вход</h2>
         <div className="auth__input-wrapper">
-          <input className="auth__input" placeholder="Email" required type="email"/>
+          <input onChange={handleEmailChange} className="auth__input" type="email" placeholder="Email" required/>
         </div>
         <div className="auth__input-wrapper">
-          <input className="auth__input" maxLength="20" minLength="8" placeholder="Пароль" required type="password"/>
+          <input onChange={handlePasswordChange} className="auth__input" type="password" maxLength="20" minLength="8"
+                 placeholder="Пароль" required/>
         </div>
         <button className="auth__save-button">Войти</button>
       </form>

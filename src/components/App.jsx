@@ -1,6 +1,6 @@
 import '../index.css';
 import React from 'react';
-import {Route, Switch} from 'react-router-dom';
+import {Route, Switch, useHistory} from 'react-router-dom';
 import api from '../utils/api';
 import {CurrentUserContext} from '../contexts/CurrentUserContext';
 import Header from './Header';
@@ -15,6 +15,7 @@ import ProtectedRoute from './ProtectedRoute';
 import Login from './Login';
 import Register from './Register';
 import InfoTooltip from './InfoTooltip';
+import {getContent} from '../utils/auth';
 
 function App() {
   const [currentUser, setCurrentUser] = React.useState({});
@@ -24,19 +25,44 @@ function App() {
   const [isAddPlacePopupOpen, setAddPlacePopupOpen] = React.useState(false);
   const [isConfirmPopupOpen, setConfirmPopupOpen] = React.useState(false);
   const [isTooltipPopupOpened, setTooltipPopupOpened] = React.useState(false);
+  const [isFetchOk, setIsFetchOk] = React.useState(false);
   const [selectedCard, setSelectedCard] = React.useState(null);
   const [isSaving, setIsSaving] = React.useState(false);
   const [cardToDelete, setCardToDelete] = React.useState(null);
   const [loggedIn, setLoggedIn] = React.useState(false);
+  const history = useHistory();
+
+  function checkToken() {
+    const token = localStorage.getItem('token');
+    if (token) {
+      getContent(token)
+        .then(data => {
+          if (data) {
+            setCurrentUser(prev => {
+              return {...prev, email: data.data.email};
+            });
+            setLoggedIn(true);
+            history.push('/');
+          }
+        });
+    }
+  }
 
   React.useEffect(() => {
     Promise.all([api.getInitialUser(), api.getInitialCards()])
       .then(([user, cards]) => {
-        setCurrentUser(user);
+        setCurrentUser(prev => {
+          return {...user, ...prev};
+        });
         setCards(cards);
       })
       .catch(err => console.log(err));
   }, []);
+
+  React.useEffect(() => {
+    checkToken();
+
+  }, [loggedIn]);
 
   function handleEditAvatarClick() {
     setEditAvatarPopup(true);
@@ -56,7 +82,16 @@ function App() {
 
   function handleRegister(isOk) {
     setTooltipPopupOpened(true);
-    setLoggedIn(isOk);
+    setIsFetchOk(isOk);
+  }
+
+  function handleLogin(isOk) {
+    if (isOk) {
+      setLoggedIn(true);
+    } else {
+      setTooltipPopupOpened(true);
+      setIsFetchOk(false);
+    }
   }
 
   function closeAllPopups() {
@@ -140,7 +175,7 @@ function App() {
             <Register onRegister={handleRegister}/>
           </Route>
           <Route path="/sign-in">
-            <Login/>
+            <Login onLogin={handleLogin}/>
           </Route>
           <ProtectedRoute path="/"
                           loggedIn={loggedIn}
@@ -165,11 +200,10 @@ function App() {
           <ConfirmPopup isOpen={isConfirmPopupOpen} onClose={closeAllPopups} onAgree={handleConfirmedCardDelete}/>
           <ImagePopup card={selectedCard} onClose={closeAllPopups}/>
         </>}
-        <InfoTooltip isOpen={isTooltipPopupOpened} onClose={closeAllPopups} isOk={loggedIn}/>
+        <InfoTooltip isOpen={isTooltipPopupOpened} onClose={closeAllPopups} isOk={isFetchOk}/>
       </div>
     </CurrentUserContext.Provider>
-  )
-    ;
+  );
 }
 
 export default App;
