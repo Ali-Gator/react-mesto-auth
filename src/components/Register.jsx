@@ -1,12 +1,11 @@
 import React, {useState} from 'react';
-import {NavLink, useHistory} from 'react-router-dom';
+import {NavLink} from 'react-router-dom';
 import {register} from '../utils/auth';
 
-const Register = ({onRegister}) => {
+const Register = ({onRegister, history}) => {
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  let history = useHistory();
 
   function handleEmailChange(e) {
     setEmail(e.target.value);

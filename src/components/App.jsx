@@ -44,7 +44,8 @@ function App() {
             setLoggedIn(true);
             history.push('/');
           }
-        });
+        })
+        .catch(err => console.log(err));
     }
   }
 
@@ -57,11 +58,8 @@ function App() {
         setCards(cards);
       })
       .catch(err => console.log(err));
-  }, []);
-
-  React.useEffect(() => {
     checkToken();
-  }, [loggedIn]);
+  }, []);
 
   function handleEditAvatarClick() {
     setEditAvatarPopup(true);
@@ -171,10 +169,10 @@ function App() {
         <Header/>
         <Switch>
           <Route path="/sign-up">
-            <Register onRegister={handleRegister}/>
+            <Register onRegister={handleRegister} history={history}/>
           </Route>
           <Route path="/sign-in">
-            <Login onLogin={handleLogin}/>
+            <Login onLogin={handleLogin} history={history}/>
           </Route>
           <ProtectedRoute exact path="/"
                           loggedIn={loggedIn}

@@ -1,12 +1,10 @@
 import React, {useState} from 'react';
-import {useHistory} from 'react-router-dom';
 import {authorize} from '../utils/auth';
 
-const Login = ({onLogin}) => {
+const Login = ({onLogin, history}) => {
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  let history = useHistory();
 
   function handleEmailChange(e) {
     setEmail(e.target.value);
