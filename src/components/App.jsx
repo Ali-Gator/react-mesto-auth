@@ -52,7 +52,7 @@ function App() {
     Promise.all([api.getInitialUser(), api.getInitialCards()])
       .then(([user, cards]) => {
         setCurrentUser(prev => {
-          return {...user, ...prev};
+          return {...prev, ...user};
         });
         setCards(cards);
       })
@@ -61,7 +61,6 @@ function App() {
 
   React.useEffect(() => {
     checkToken();
-
   }, [loggedIn]);
 
   function handleEditAvatarClick() {
@@ -167,7 +166,7 @@ function App() {
   }
 
   return (
-    <CurrentUserContext.Provider value={currentUser}>
+    <CurrentUserContext.Provider value={{currentUser, setLoggedIn}}>
       <div className="page">
         <Header/>
         <Switch>
@@ -177,7 +176,7 @@ function App() {
           <Route path="/sign-in">
             <Login onLogin={handleLogin}/>
           </Route>
-          <ProtectedRoute path="/"
+          <ProtectedRoute exact path="/"
                           loggedIn={loggedIn}
                           component={Main}
                           onEditAvatar={handleEditAvatarClick}
@@ -187,7 +186,6 @@ function App() {
                           cards={cards}
                           onCardLike={handleCardLike}
                           onCardDelete={handleCardDelete}/>
-
         </Switch>
         {loggedIn && <>
           <Footer/>

@@ -4,10 +4,11 @@ import {NavLink, Route, Switch} from 'react-router-dom';
 import {CurrentUserContext} from '../contexts/CurrentUserContext';
 
 export default function Header() {
-  const currentUser = useContext(CurrentUserContext);
+  const value = useContext(CurrentUserContext);
 
-  function signOut() {
+  function onSignOut() {
     localStorage.removeItem('token');
+    value.setLoggedIn(false);
   }
 
   return (
@@ -22,8 +23,8 @@ export default function Header() {
             <NavLink to="/sign-up" className="header__link">Регистрация</NavLink>
           </Route>
           <Route path="/">
-            <p className="header__text">{currentUser.email}</p>
-            <NavLink onClick={signOut} to="/sign-in" className="header__link header__link_minor">Выйти</NavLink>
+            <p className="header__text">{value.currentUser.email}</p>
+            <NavLink onClick={onSignOut} to="/sign-in" className="header__link header__link_minor">Выйти</NavLink>
           </Route>
         </Switch>
       </div>
