@@ -59,7 +59,7 @@ function App() {
       })
       .catch(err => console.log(err));
     checkToken();
-  }, []);
+  }, [loggedIn]);
 
   function handleEditAvatarClick() {
     setEditAvatarPopup(true);
